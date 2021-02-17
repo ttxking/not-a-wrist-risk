@@ -76,7 +76,7 @@ def get_light():
 
 
 @app.route('/get_light2', methods=['GET'])
-def get_light():
+def get_light2():
     light_id = request.args.get('light_id')
     if light_id :
         filt = {"light_id" : int(light_id)}
