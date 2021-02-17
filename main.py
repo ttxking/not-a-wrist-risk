@@ -52,7 +52,6 @@ def get_light():
     light_id = request.args.get('light_id')
     if light_id :
         filt = {"light_id" : int(light_id)}
-
         query = myLightCollection.find(filt)
         output = []
 
@@ -64,7 +63,7 @@ def get_light():
             })
         return {"result" : output}
     else : 
-        query = myLightCollection.find(filt)
+        query = myLightCollection.find()
         output = []
 
         for ele in query:
@@ -93,7 +92,7 @@ def get_light():
             })
         return {"result" : output}
     else : 
-        query = myLight2Collection.find(filt)
+        query = myLight2Collection.find()
         output = []
 
         for ele in query:
