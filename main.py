@@ -5,9 +5,11 @@ app = Flask(__name__)
 app.config['MONGO_URI'] = 'mongodb://exceed_group14:smcts5we@158.108.182.0:2255/exceed_group14'
 mongo = PyMongo(app)
 
-myLightCollection = mongo.db.Light
-myMovementCollection = mongo.db.Movement
-myLocationCollection = mongo.db.Location
+myLightCollection = mongo.db.Light # keep track of first light sensitivity sensor
+myLight2Collection = mongo.db.Light2 # keep track of second light sensitivity sensor
+myMovementCollection = mongo.db.Movement # keep track of movement
+myLocationCollection = mongo.db.Location # keep track of location
+myInformation = mongo.db.Information # keep track of calculation for user
 
 
 # GET INFO
@@ -51,7 +53,7 @@ def get_light():
     if light_id :
         filt = {"light_id" : int(light_id)}
 
-        query = myMovementCollection.find(filt)
+        query = myLightCollection.find(filt)
         output = []
 
         for ele in query:
@@ -62,7 +64,7 @@ def get_light():
             })
         return {"result" : output}
     else : 
-        query = myMovementCollection.find(filt)
+        query = myLightCollection.find(filt)
         output = []
 
         for ele in query:
@@ -73,6 +75,67 @@ def get_light():
             })
         return {"result" : output}
 
+
+@app.route('/get_light2', methods=['GET'])
+def get_light():
+    light_id = request.args.get('light_id')
+    if light_id :
+        filt = {"light_id" : int(light_id)}
+
+        query = myLight2Collection.find(filt)
+        output = []
+
+        for ele in query:
+            output.append({
+                "light_id" : ele["light_id"],
+                "time_stamped" : ele["time_stamped"],
+                "light_sensitivity" : ele["sensitivity"]
+            })
+        return {"result" : output}
+    else : 
+        query = myLight2Collection.find(filt)
+        output = []
+
+        for ele in query:
+            output.append({
+                "light_id" : ele["light_id"],
+                "time_stamped" : ele["time_stamped"],
+                "light_sensitivity" : ele["sensitivity"]
+            })
+        return {"result" : output}
+
+@app.route('/information', methods=['GET'])
+def get_info():
+    user_id = request.args.get('user_id')
+    if user_id:
+        filt = {"user_id": user_id}
+
+        query = myInformation.find(filt)
+        output = []
+        
+        for ele in query:
+            output.append({
+                "user_id": ele["user_id"],
+                "movement_status" : ele["movement_status"], # too little, too much
+                "light_status" : ele["light_status"], # too dark, too bright
+                "movement_time" : ele["movement_time"],  # total movement time
+                "calories" : ele["calories"]
+            })
+        
+        return {"result" : output}
+    else :
+        query = myInformation.find()
+        output = []
+        
+        for ele in query:
+            output.append({
+                "user_id": ele["user_id"],
+                "movement_status" : ele["movement_status"],
+                "light_status" : ele["light_status"],
+                "movement_time" : ele["movement_time"],  
+                "calories" : ele["calories"]
+            })
+        return {"result" : output}
 
 # CALCULATION PART 
 
