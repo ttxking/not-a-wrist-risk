@@ -5,8 +5,7 @@ app = Flask(__name__)
 app.config['MONGO_URI'] = 'mongodb://exceed_group14:smcts5we@158.108.182.0:2255/exceed_group14'
 mongo = PyMongo(app)
 
-myLightCollection = mongo.db.Light # keep track of first light sensitivity sensor
-myLight2Collection = mongo.db.Light2 # keep track of second light sensitivity sensor
+myLightCollection = mongo.db.Light # keep track of light sensitivity sensor
 myMovementCollection = mongo.db.Movement # keep track of movement
 myLocationCollection = mongo.db.Location # keep track of location
 myInformation = mongo.db.Information # keep track of calculation for user
@@ -58,7 +57,6 @@ def get_light():
         for ele in query:
             output.append({
                 "light_id" : ele["light_id"],
-                "time_stamped" : ele["time_stamped"],
                 "light_sensitivity" : ele["sensitivity"]
             })
         return {"result" : output}
@@ -69,39 +67,10 @@ def get_light():
         for ele in query:
             output.append({
                 "light_id" : ele["light_id"],
-                "time_stamped" : ele["time_stamped"],
                 "light_sensitivity" : ele["sensitivity"]
             })
         return {"result" : output}
 
-
-@app.route('/get_light2', methods=['GET'])
-def get_light2():
-    light_id = request.args.get('light_id')
-    if light_id :
-        filt = {"light_id" : int(light_id)}
-
-        query = myLight2Collection.find(filt)
-        output = []
-
-        for ele in query:
-            output.append({
-                "light_id" : ele["light_id"],
-                "time_stamped" : ele["time_stamped"],
-                "light_sensitivity" : ele["sensitivity"]
-            })
-        return {"result" : output}
-    else : 
-        query = myLight2Collection.find()
-        output = []
-
-        for ele in query:
-            output.append({
-                "light_id" : ele["light_id"],
-                "time_stamped" : ele["time_stamped"],
-                "light_sensitivity" : ele["sensitivity"]
-            })
-        return {"result" : output}
 
 @app.route('/information', methods=['GET'])
 def get_info():
@@ -160,7 +129,6 @@ def create_movement():
 
     myInsert = {
         "movement_id" : data["movement_id"],
-        "time_stamped" : data["time_stamped"],
         "x": data["x"],
         "y" : data["y"],
         "z" : data["z"]
@@ -169,7 +137,18 @@ def create_movement():
     myMovementCollection.insert_one(myInsert)
     return {'result': 'Created successfully'}
 
+# CREATE LIGHT
+@app.route('/create_light', methods=['POST'])
+def create_light():
+    data = request.json
 
+    myInsert = {
+        "light_id" : data["light_id"],
+        "light_sensitivity" : data["sensitivity"]
+    }
+
+    myLightCollection.insert_one(myInsert)
+    return {'result': 'Created successfully'}
 
 # CALCULATION PART 
 
@@ -205,17 +184,25 @@ def cal_movement():
 # calculate light
 @app.route('/cal_light', methods=['PATCH'])
 def cal_light():
-    data = request.json
-    myLightCollection.update_one()
-    return {'result': 'Updated successfully'}
+    lastest_light = myLightCollection.find().sort([("_id", -1)]).limit(1)
 
+    user_id = request.args.get('user_id')
+    filt = {"user_id": int(user_id)}
 
-# # UPDATE VALUE
-# @app.route('/update', methods=['PATCH'])
-# def update_info():
-    
+    light_status = "None"
+    light_updated_status = "None"
 
+    for ele in lastest_light:
+        if ele['light_sensitivity'] > 800:
+            light_status = "Your device is too bright, Lower it down!"
+        elif ele['light_sensitivity'] < 0:
+            light_status = "Your device is too dim, Increase your device brightness!"
+        else :
+            light_status = "Keep up your good work. Your device doesn't hurt your eyes"
 
+    light_updated_status = {"set": {"light_status": light_status}}
+    myInformation.update_one(filt, light_updated_status)
+    return {'result': 'Updated successfully'}    
 
 
 # NON CATEGORY 
