@@ -136,21 +136,87 @@ def get_info():
             })
         return {"result" : output}
 
+
+# CREATE USER 
+@app.route('/create_user', methods=['POST'])
+def create_user():
+    data = request.json
+
+    myInsert = {
+        "user_id" : data["user_id"],
+        "movement_status" : "No status",
+        "light_status" : "No status",
+        "movement_time" : 0,  
+        "calories" : 0
+    }
+
+    myInformation.insert_one(myInsert)
+    return {'result': 'Created successfully'}
+
+# CREATE MOVEMENT
+@app.route('/create_movement', methods=['POST'])
+def create_movement():
+    data = request.json
+
+    myInsert = {
+        "movement_id" : data["movement_id"],
+        "time_stamped" : data["time_stamped"],
+        "x": data["x"],
+        "y" : data["y"],
+        "z" : data["z"]
+    }
+
+    myMovementCollection.insert_one(myInsert)
+    return {'result': 'Created successfully'}
+
+
+
 # CALCULATION PART 
 
-#calculate movement
-@app.route('/movement', methods=['POST'])
+# calculate movement
+@app.route('/cal_movement', methods=['PATCH'])
 def cal_movement():
-    data = request.json
-    myMovementCollection.update_one()
+    lastest_movement = myMovementCollection.find().sort([("_id", -1)]).limit(1)
+    first_movement = myMovementCollection.find().sort([("_id", 1)]).limit(1)
+
+    user_id = request.args.get('user_id')
+    filt = {"user_id": int(user_id)}
+
+    movement_status = "None"
+    movement_updated_status = "None"
+
+    for ele_i in lastest_movement:
+        for ele_j in first_movement:
+            if ( abs(ele_i['x'] - ele_j['x']) and  abs(ele_i['y'] - ele_j['y']) < 10 and abs(ele_i['z'] - ele_j['z']) < 10) :
+                movement_status = 'Movement is too little. You need some exercise!'
+            elif (abs(ele_i['x'] - ele_j['x'])):
+                movement_status = 'Movement is x-axis is too little. Please move left and right'
+            elif (abs(ele_i['y'] - ele_j['y'])):
+                movement_status = 'Movement is y-axis is too little. Please move up and down'
+            elif (abs(ele_i['z'] - ele_j['z'])):
+                movement_status = 'Movement is z-axis is too little. Please move front and back'
+            else:
+                movement_status = 'Your movement is good. Keep up your work!'
+
+    movement_updated_status = {"$set": {"movement_status" : movement_status}}
+    myInformation.update_one(filt, movement_updated_status)
     return {'result': 'Updated successfully'}
 
-#calculate light
-@app.route('/light', methods=['POST'])
+# calculate light
+@app.route('/cal_light', methods=['PATCH'])
 def cal_light():
     data = request.json
     myLightCollection.update_one()
     return {'result': 'Updated successfully'}
+
+
+# # UPDATE VALUE
+# @app.route('/update', methods=['PATCH'])
+# def update_info():
+    
+
+
+
 
 # NON CATEGORY 
 
@@ -174,7 +240,7 @@ def get_my_ip():
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port='50002', debug=True)
+    app.run(host='0.0.0.0', port='3000', debug=True)
 
 
 
