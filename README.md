@@ -80,7 +80,12 @@ This is the backend repository for smartwristband project which is the paart of 
         * update calories and total movement time of specific user
     
     * /update_location_status
-        * update finding status 0 if the user is not using finding mode, 1 vice versa
+        * update finding status 0 if the user is not using finding mode, 1 vice versa.  the **INPUT** format is
+    ```
+        {
+           "finding_status": int(0,1)
+        }
+    ```
 
 ### ROUTING IP
     158.108.182.16:500014  # PS. Port may changed due to traffic please contact me
