@@ -33,7 +33,7 @@ This is the backend repository for smartwristband project which is the paart of 
         }
 
     ```
-    * /information
+    * /information or /information?user_id={value}
         * return statistics summary of the users
     ```
         {
@@ -73,7 +73,7 @@ This is the backend repository for smartwristband project which is the paart of 
     * /cal_movement?user_id={value}
         * update movement status of specific user
 
-    * /cal_light?use_id={value}
+    * /cal_light?user_id={value}
         * update light status of specific user
  
     * /cal_calories_and_time?user_id={value}
