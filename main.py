@@ -29,10 +29,8 @@ def get_movement():
         for ele in query:
             output.append({
                 "movement_id": ele["movement_id"],
-                "time_stamped": ele["time_stamped"],
-                "x": ele["x"],
-                "y": ele["y"],
-                "z": ele["z"]
+                "fast_movement": ele["fast_movement"], # บอกว่าขยับเร็วไป
+                "no_movement": ele["no_movement"] # บแกว่าไม่ค้อยขยับ
             })
         return {"result": output}
     else:
@@ -42,10 +40,8 @@ def get_movement():
         for ele in query:
             output.append({
                 "movement_id": ele["movement_id"],
-                "time_stamped": ele["time_stamped"],
-                "x": ele["x"],
-                "y": ele["y"],
-                "z": ele["z"]
+                "fast_movement": ele["fast_movement"], # บอกว่าขยับเร็วไป
+                "no_movement": ele["no_movement"] # บแกว่าไม่ค้อยขยับ
             })
         return {"result": output}
 
@@ -144,9 +140,8 @@ def create_movement():
 
     myInsert = {
         "movement_id": data["movement_id"],
-        "x": data["x"],
-        "y": data["y"],
-        "z": data["z"]
+        "fast_movement": data["fast_movement"], # บอกว่าขยับเร็วไป
+        "no_movement": data["no_movement"] # บแกว่าไม่ค้อยขยับ
     }
 
     myMovementCollection.insert_one(myInsert)
@@ -173,27 +168,23 @@ def create_light():
 # calculate movement
 @app.route('/cal_movement', methods=['PUT'])
 def cal_movement():
-    lastest_movement = myMovementCollection.find().sort([("_id", -1)]).limit(1)
-    first_movement = myMovementCollection.find().sort([("_id", 1)]).limit(1)
+    # id ของ movement
+    index = myMovementCollection.count()
+    id_filt = {"movement_id": int(index)}
 
+    lastest_movement = myMovementCollection.find(id_filt)
+
+    for ele in lastest_movement:
+        if ele['fast_movement'] == 1 and ele['no_movement'] == 0:
+            movement_status = "You are moving too fast! Please slow down, You may hurt your muscle."
+        elif ele['no_movement'] == 1 and ele['fast_movement'] == 0:
+            movement_status = "You are not moving at all! Please move to strength your muscle."
+        else:
+            movement_status = 'Your movement is good. Keep up your work!'
+
+    # id ของ user
     user_id = request.args.get('user_id')
     filt = {"user_id": int(user_id)}
-
-    movement_status = "None"
-
-    for ele_i in lastest_movement:
-        for ele_j in first_movement:
-            if (abs(ele_i['x'] - ele_j['x']) and abs(ele_i['y'] - ele_j['y']) < 10 and abs(
-                    ele_i['z'] - ele_j['z']) < 10):
-                movement_status = 'Movement is too little. You need some exercise!'
-            elif abs(ele_i['x'] - ele_j['x'] < 10):
-                movement_status = 'Movement is x-axis is too little. Please move left and right'
-            elif abs(ele_i['y'] - ele_j['y'] < 10):
-                movement_status = 'Movement is y-axis is too little. Please move up and down'
-            elif abs(ele_i['z'] - ele_j['z'] < 10):
-                movement_status = 'Movement is z-axis is too little. Please move front and back'
-            else:
-                movement_status = 'Your movement is good. Keep up your work!'
 
     movement_updated_status = {"$set": {"movement_status": movement_status}}
     myInformation.update_one(filt, movement_updated_status)
