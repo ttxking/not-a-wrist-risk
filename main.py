@@ -11,9 +11,6 @@ myMovementCollection = mongo.db.Movement  # keep track of movement
 myLocationCollection = mongo.db.Location  # keep track of location
 myInformation = mongo.db.Information  # keep track of calculation for user
 
-
-# GET INFO
-
 # =================== GET ============================
 
 # get x,y,z coordinates form gyro
@@ -116,7 +113,6 @@ def get_info():
 
 # =================== POST ============================
 
-# CREATE USER
 @app.route('/create_user', methods=['POST'])
 def create_user():
     data = request.json
@@ -163,7 +159,6 @@ def create_light():
 
 
 # =================== PUT ============================
-# CALCULATION PART
 
 # calculate movement
 @app.route('/cal_movement', methods=['PUT'])
@@ -222,18 +217,31 @@ def find_status():
     return {'result': 'Updated successfully'}
 
 
-# @app.route('/frontend',methods=['GET'])
-# def get_info():
-#     output = []
-#     return {'result': output}
+@app.route('/cal_calories_and_time', methods=['PUT'])
+def cal_calories_and_time():
+    index = myMovementCollection.count()
+    id_filt = {"movement_id": int(index)}
 
+    lastest_movement = myMovementCollection.find(id_filt)
 
-# @app.route('/create',methods=['POST'])
-# def create():
-#     data = request.json
-#     create = {'status':data['status']}
-#     myCollection.insert_one(create)
-#     return {'result': 'Created successfully'}
+    for ele in lastest_movement:
+        if ele['fast_movement'] == 1 and ele['no_movement'] == 0:  
+
+            # ขยับรอบระวิ ขยับๆต่อกัน 30 รอบส่ง 1 ที เป็นเวลา 30 วิ 
+            total_calories = 0.016 # avg moving calories is 60 calories/hour or 0.0.16 calories/sec
+            total_time = 30 
+
+            # update both in increment
+            updated_calories = {"$inc": {"calories": total_calories}} # increment in calories
+            updated_times = {"$inc": {"movement_time": total_time}}
+
+            user_id = request.args.get('user_id')
+            filt = {"user_id": int(user_id)}
+
+            myInformation.update(filt, updated_calories)
+            myInformation.update(filt, updated_times)
+
+    return {'result': 'Updated successfully'}
 
 
 if __name__ == "__main__":
