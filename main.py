@@ -1,15 +1,18 @@
 from flask import Flask, request, jsonify
 from flask_pymongo import PyMongo
 from bson.json_util import dumps
+from flask_cors import CORS
 
 app = Flask(__name__)
 app.config['MONGO_URI'] = 'mongodb://exceed_group14:smcts5we@158.108.182.0:2255/exceed_group14'
 mongo = PyMongo(app)
+CORS(app)
 
 myLightCollection = mongo.db.Light  # keep track of light sensitivity sensor
 myMovementCollection = mongo.db.Movement  # keep track of movement
 myLocationCollection = mongo.db.Location  # keep track of location
 myInformation = mongo.db.Information  # keep track of calculation for user
+
 
 # =================== GET ============================
 
@@ -26,8 +29,8 @@ def get_movement():
         for ele in query:
             output.append({
                 "movement_id": ele["movement_id"],
-                "fast_movement": ele["fast_movement"], # บอกว่าขยับเร็วไป
-                "no_movement": ele["no_movement"] # บแกว่าไม่ค้อยขยับ
+                "fast_movement": ele["fast_movement"],  # บอกว่าขยับเร็วไป
+                "no_movement": ele["no_movement"]  # บแกว่าไม่ค้อยขยับ
             })
         return {"result": output}
     else:
@@ -37,8 +40,8 @@ def get_movement():
         for ele in query:
             output.append({
                 "movement_id": ele["movement_id"],
-                "fast_movement": ele["fast_movement"], # บอกว่าขยับเร็วไป
-                "no_movement": ele["no_movement"] # บแกว่าไม่ค้อยขยับ
+                "fast_movement": ele["fast_movement"],  # บอกว่าขยับเร็วไป
+                "no_movement": ele["no_movement"]  # บแกว่าไม่ค้อยขยับ
             })
         return {"result": output}
 
@@ -75,7 +78,8 @@ def get_location_status():
     output = []
 
     for ele in query:
-        return  {"finding_status": ele["finding_status"]}  # 0 1
+        return {"finding_status": ele["finding_status"]}  # 0 1
+
 
 @app.route('/information', methods=['GET'])
 def get_info():
@@ -133,11 +137,10 @@ def create_user():
 @app.route('/create_movement', methods=['POST'])
 def create_movement():
     data = request.json
-
     myInsert = {
         "movement_id": data["movement_id"],
-        "fast_movement": data["fast_movement"], # บอกว่าขยับเร็วไป
-        "no_movement": data["no_movement"] # บแกว่าไม่ค้อยขยับ
+        "fast_movement": data["fast_movement"],  # บอกว่าขยับเร็วไป
+        "no_movement": data["no_movement"]  # บแกว่าไม่ค้อยขยับ
     }
 
     myMovementCollection.insert_one(myInsert)
@@ -197,10 +200,8 @@ def cal_light():
     light_status = "None"
 
     for ele in lastest_light:
-        if ele['light_sensitivity'] > 800:
+        if ele['light_sensitivity'] > 600:
             light_status = "Your device is too bright, Lower it down!"
-        elif ele['light_sensitivity'] < 0:
-            light_status = "Your device is too dim, Increase your device brightness!"
         else:
             light_status = "Keep up your good work. Your device doesn't hurt your eyes"
 
@@ -225,14 +226,13 @@ def cal_calories_and_time():
     lastest_movement = myMovementCollection.find(id_filt)
 
     for ele in lastest_movement:
-        if ele['fast_movement'] == 1 and ele['no_movement'] == 0:  
-
+        if ele['fast_movement'] == 1 and ele['no_movement'] == 0:
             # ขยับรอบระวิ ขยับๆต่อกัน 30 รอบส่ง 1 ที เป็นเวลา 30 วิ 
-            total_calories = 0.016 # avg moving calories is 60 calories/hour or 0.0.16 calories/sec
-            total_time = 30 
+            total_calories = 0.016  # avg moving calories is 60 calories/hour or 0.0.16 calories/sec
+            total_time = 30
 
             # update both in increment
-            updated_calories = {"$inc": {"calories": total_calories}} # increment in calories
+            updated_calories = {"$inc": {"calories": total_calories}}  # increment in calories
             updated_times = {"$inc": {"movement_time": total_time}}
 
             user_id = request.args.get('user_id')
