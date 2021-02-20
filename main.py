@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify
 from flask_pymongo import PyMongo
 from bson.json_util import dumps
 from flask_cors import CORS
-from datetime import date
 
 app = Flask(__name__)
 app.config['MONGO_URI'] = 'mongodb://exceed_group14:smcts5we@158.108.182.0:2255/exceed_group14'
@@ -97,8 +96,7 @@ def get_info():
                 "movement_status": ele["movement_status"],  # too little, too much
                 "light_status": ele["light_status"],  # too dark, too bright
                 "movement_time": ele["movement_time"],  # total movement time
-                "calories": ele["calories"],
-                "date": ele["date"]
+                "calories": ele["calories"]
             })
 
         return {"result": output}
@@ -122,15 +120,13 @@ def get_info():
 @app.route('/create_user', methods=['POST'])
 def create_user():
     data = request.json
-    today = date.today()
 
     myInsert = {
         "user_id": data["user_id"],
         "movement_status": "No status",
         "light_status": "No status",
         "movement_time": 0,
-        "calories": 0,
-        "date" : today.strftime("%d/%m/%Y")
+        "calories": 0
     }
 
     myInformation.insert_one(myInsert)
@@ -241,27 +237,6 @@ def cal_calories_and_time():
 
     return {'result': 'Updated successfully'}
 
-@app.route('/reset_info', methods=['PUT'])
-def reset_info():
-    today = date.today()
-    user_id = request.args.get('user_id')
-    filt = {"user_id": int(user_id)}
-
-    query = myInformation.find(filt)
-    for ele in query:
-        if ele['date'] != today.strftime("%d/%m/%Y"):
-            reset_record = {"$set": {
-                "user_id": 1,
-                "movement_status": "No status",
-                "light_status": "No status",
-                "movement_time": 0,
-                "calories": 0,
-                "date": today.strftime("%d/%m/%Y")
-            }}
-
-    myInformation.update(filt,reset_record)
-    return {'result': 'ResetInfo successfully'}
-
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port='3000', debug=True)
+    app.run(host='0.0.0.0', port='50014', debug=True)
