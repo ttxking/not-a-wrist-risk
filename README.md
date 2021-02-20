@@ -86,6 +86,8 @@ This is the backend repository for smartwristband project which is the paart of 
            "finding_status": int(0,1)
         }
     ```
+    * /reset_info?user_id={value}
+        * reset user info after 1 day
 
 ### ROUTING IP
     158.108.182.16:500014  # PS. Port may changed due to traffic please contact me
