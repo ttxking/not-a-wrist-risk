@@ -57,7 +57,7 @@ def get_light():
         for ele in query:
             output.append({
                 "light_id": ele["light_id"],
-                "light_sensitivity": ele["sensitivity"]
+                "light_sensitivity": ele["light_sensitivit"]
             })
         return {"result": output}
     else:
@@ -67,7 +67,7 @@ def get_light():
         for ele in query:
             output.append({
                 "light_id": ele["light_id"],
-                "light_sensitivity": ele["sensitivity"]
+                "light_sensitivity": ele["light_sensitivit"]
             })
         return {"result": dumps(output)}
 
@@ -154,7 +154,7 @@ def create_light():
 
     myInsert = {
         "light_id": data["light_id"],
-        "light_sensitivity": data["sensitivity"]
+        "light_sensitivity": data["light_sensitivity"]
     }
 
     myLightCollection.insert_one(myInsert)
@@ -167,10 +167,11 @@ def create_light():
 @app.route('/cal_movement', methods=['PUT'])
 def cal_movement():
     # id ของ movement
-    index = myMovementCollection.count()
-    id_filt = {"movement_id": int(index)}
+    lastest_movement = myMovementCollection.find().sort([("_id", -1)]).limit(1)
 
-    lastest_movement = myMovementCollection.find(id_filt)
+    user_id = request.args.get('user_id')
+    filt = {"user_id": int(user_id)}
+
 
     for ele in lastest_movement:
         if ele['fast_movement'] == 1 and ele['no_movement'] == 0:
@@ -179,13 +180,9 @@ def cal_movement():
             movement_status = "You are not moving at all! Please move to strength your muscle."
         else:
             movement_status = 'Your movement is good. Keep up your work!'
-
-    # id ของ user
-    user_id = request.args.get('user_id')
-    filt = {"user_id": int(user_id)}
-
-    movement_updated_status = {"$set": {"movement_status": movement_status}}
-    myInformation.update_one(filt, movement_updated_status)
+            
+            movement_updated_status = {"$set": {"movement_status": movement_status}}
+            myInformation.update_one(filt, movement_updated_status)
     return {'result': 'Updated successfully'}
 
 
@@ -205,8 +202,8 @@ def cal_light():
         else:
             light_status = "Keep up your good work. Your device doesn't hurt your eyes"
 
-    light_updated_status = {"set": {"light_status": light_status}}
-    myInformation.update_one(filt, light_updated_status)
+        light_updated_status = {"$set": {"light_status": light_status}}
+        myInformation.update_one(filt, light_updated_status)
     return {'result': 'Updated successfully'}
 
 
@@ -220,10 +217,10 @@ def find_status():
 
 @app.route('/cal_calories_and_time', methods=['PUT'])
 def cal_calories_and_time():
-    index = myMovementCollection.count()
-    id_filt = {"movement_id": int(index)}
 
-    lastest_movement = myMovementCollection.find(id_filt)
+    lastest_movement = myMovementCollection.find().sort([("_id", -1)]).limit(1)
+    user_id = request.args.get('user_id')
+    filt = {"user_id": int(user_id)}
 
     for ele in lastest_movement:
         if ele['fast_movement'] == 1 and ele['no_movement'] == 0:
@@ -234,9 +231,6 @@ def cal_calories_and_time():
             # update both in increment
             updated_calories = {"$inc": {"calories": total_calories}}  # increment in calories
             updated_times = {"$inc": {"movement_time": total_time}}
-
-            user_id = request.args.get('user_id')
-            filt = {"user_id": int(user_id)}
 
             myInformation.update(filt, updated_calories)
             myInformation.update(filt, updated_times)
