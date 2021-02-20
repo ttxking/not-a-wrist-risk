@@ -258,6 +258,8 @@ def reset_info():
                 "calories": 0,
                 "date": today.strftime("%d/%m/%Y")
             }}
+            myMovementCollection.remove({})
+            myLightCollection.remove({})
 
     myInformation.update(filt,reset_record)
     return {'result': 'ResetInfo successfully'}
