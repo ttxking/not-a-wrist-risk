@@ -15,7 +15,7 @@ This is the backend repository for smartwristband project which is the paart of 
 
 1. Clone this repository to your computer.
     ```
-    git clone https://github.com/ttxking/smartwristband.git
+    git clone https://github.com/ttxking/not-a-wrist-risk.git
     ```
 2. Change directory to the repository.
     ```
