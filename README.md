@@ -12,7 +12,6 @@ This is the backend repository for smartwristband project which is the paart of 
 |    Name    | Required version(s) |
 | :--------: | :-----------------: |
 |   Python   |   3.7 or higher     |
-|   Django   |   3.1 or higher     |
 
 1. Clone this repository to your computer.
     ```
