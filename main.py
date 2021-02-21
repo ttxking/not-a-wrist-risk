@@ -1,8 +1,9 @@
-from flask import Flask, request, jsonify
+\from flask import Flask, request, jsonify
 from flask_pymongo import PyMongo
 from bson.json_util import dumps
 from flask_cors import CORS
-from datetime import date
+from datetime import date, datetime
+import pytz
 
 app = Flask(__name__)
 app.config['MONGO_URI'] = 'mongodb://exceed_group14:smcts5we@158.108.182.0:2255/exceed_group14'
@@ -14,6 +15,8 @@ myMovementCollection = mongo.db.Movement  # keep track of movement
 myLocationCollection = mongo.db.Location  # keep track of location
 myInformation = mongo.db.Information  # keep track of calculation for user
 
+# set time zone
+tz = pytz.timezone('Asia/Bangkok')
 
 # =================== GET ============================
 
@@ -122,7 +125,7 @@ def get_info():
 @app.route('/create_user', methods=['POST'])
 def create_user():
     data = request.json
-    today = date.today()
+    today = datetime.now(tz)
 
     myInsert = {
         "user_id": data["user_id"],
@@ -243,7 +246,7 @@ def cal_calories_and_time():
 
 @app.route('/reset_info', methods=['PUT'])
 def reset_info():
-    today = date.today()
+    today = datetime.now(tz)
     user_id = request.args.get('user_id')
     filt = {"user_id": int(user_id)}
 
@@ -260,10 +263,9 @@ def reset_info():
             }}
             myMovementCollection.remove({})
             myLightCollection.remove({})
-
-    myInformation.update(filt,reset_record)
+            myInformation.update(filt,reset_record)
     return {'result': 'ResetInfo successfully'}
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port='3000', debug=True)
+    app.run(host='0.0.0.0', port='50014', debug=True)
