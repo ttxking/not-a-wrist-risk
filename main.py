@@ -187,9 +187,9 @@ def cal_movement():
             movement_status = "You are not moving at all! Please move to strength your muscle."
         else:
             movement_status = 'Your movement is good. Keep up your work!'
-            
-            movement_updated_status = {"$set": {"movement_status": movement_status}}
-            myInformation.update_one(filt, movement_updated_status)
+        
+        movement_updated_status = {"$set": {"movement_status": movement_status}}
+        myInformation.update_one(filt, movement_updated_status)
     return {'result': 'Updated successfully'}
 
 
