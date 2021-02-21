@@ -7,6 +7,30 @@
 
 This is the backend repository for smartwristband project which is the paart of exceed17 camp
 
+### Getting Started
+
+|    Name    | Required version(s) |
+| :--------: | :-----------------: |
+|   Python   |   3.7 or higher     |
+|   Django   |   3.1 or higher     |
+
+1. Clone this repository to your computer.
+    ```
+    git clone https://github.com/ttxking/smartwristband.git
+    ```
+2. Change directory to the repository.
+    ```
+    cd smartwristband
+    ```
+3. Run this command to install all require packages.
+    ``` 
+    pip install -r requirements.txt
+    ```
+4. Start running the server by this command.
+    ```
+    python3 main.py
+    ```
+
 ### API
 
 * GET
