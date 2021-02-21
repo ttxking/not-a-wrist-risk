@@ -1,5 +1,8 @@
 # Smart Wristband
 
+### Technology used
+<img alt="Python" src="https://img.shields.io/badge/python%20-%2314354C.svg?&style=for-the-badge&logo=python&logoColor=white"/> <img alt="Flask" src="https://img.shields.io/badge/flask%20-%23000.svg?&style=for-the-badge&logo=flask&logoColor=white"/>
+
 ### Description
 
 This is the backend repository for smartwristband project which is the paart of exceed17 camp
